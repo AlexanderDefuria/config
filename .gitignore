@@ -1,4 +1,5 @@
 /*
 !.gitignore
 !/nvim/init.lua
+nvim/pack/github/start/copilot.vim
 
