@@ -3,8 +3,7 @@ vim.opt.shiftwidth = 4    -- Set the number of space characters used for each st
 vim.opt.expandtab = true  -- Converts tabs to spaces
 vim.opt.number = true     -- Print the line number in front of each line
 vim.opt.relativenumber = true
-vim.api.nvim_set_keymap('n', '<Up>', 'gk', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<Down>', 'gj', { noremap = true, silent = true })
+vim.opt.clipboard = 'unnamedplus' -- Use the system clipboard
 vim.g.python3_host_prog = '/usr/bin/python3'
 
 -- Auto-install vim-plug if it's not already installed
@@ -32,7 +31,6 @@ vim.cmd [[
   Plug 'davidhalter/jedi-vim'
   Plug 'navarasu/onedark.nvim'
   Plug 'morhetz/gruvbox'
-
   Plug 'tpope/vim-sensible'
   Plug 'lervag/vimtex'
   Plug 'dense-analysis/ale'
@@ -44,11 +42,13 @@ vim.cmd [[
 
 require('onedark').setup({
   style = 'darker', 
-  toggle_style_key = '<leader>ts'
+  toggle_style_key = '<leader>ts',
+  colors = {
+    fg = '#c1c5cd',
+    bg0 = '#0d0d0d',
+  }
 })
 require('onedark').load()
-
-require'lspconfig'.pyright.setup{}
 
 -- vimtex settings
 vim.g.vimtex_view_method = 'skim' -- Change to your preferred PDF viewer
@@ -56,19 +56,39 @@ vim.g.vimtex_compiler_method = 'latexmk'
 vim.g.ale_fix_on_save = 1
 vim.g.ale_linters = {tex = {'chktex', 'lacheck'}}
 vim.g.vimtex_view_method = 'skim'
-vim.g.vimtex_view_skim_sync = 1
-vim.g.vimtex_view_skim_activate = 0
-vim.g.vimtex_view_skim_no_select = 0
+-- vim.g.vimtex_view_skim_sync = 1
+-- vim.g.vimtex_view_skim_activate = 0
+-- vim.g.vimtex_view_skim_no_select = 0
 
+-- Conceal settings, looks kinda bad...
+-- vim.o.concealcursor = 'n'
+-- vim.o.conceallevel = 2
+
+vim.api.nvim_set_keymap('n', '<C-n>', ':NERDTreeToggle<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<C-/>', '<plug>NERDCommenterInvert', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('i', '<Tab>', 'pumvisible() ? "\\<C-n>" : "\\<Tab>"', {expr = true, noremap = true, silent = true})
 vim.api.nvim_set_keymap('i', '<S-Tab>', 'pumvisible() ? "\\<C-p>" : "\\<S-Tab>"', {expr = true, noremap = true, silent = true})
 vim.api.nvim_set_keymap('i', '<CR>', 'pumvisible() ? coc#_select_confirm() : "\\<C-g>u\\<CR>\\<c-r>=coc#on_enter()\\<CR>"', {expr = true, noremap = true, silent = true})
 vim.api.nvim_set_keymap('i', '<C-Space>', 'coc#refresh()', {expr = true, noremap = true, silent = true})
 vim.api.nvim_set_keymap("n", "<leader>dd", ":lua vim.diagnostic.open_float()<CR>", {silent=true})
+vim.api.nvim_set_keymap('n', '<Up>', 'gk', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<Down>', 'gj', { noremap = true, silent = true })
 
 
 -- Optional: CoC settings for auto-completion
-vim.g.coc_global_extensions = {'coc-snippets', 'coc-pairs', 'coc-texlab'}
+vim.g.coc_global_extensions = {
+  'coc-snippets',
+  'coc-pairs',
+  'coc-texlab',
+  'coc-json',
+  'coc-css',
+  'coc-clangd',
+  'coc-pyright',
+}
+-- Disable coc for certain filetypes
+--vim.cmd [[
+  --autocmd FileType python let b:coc_suggest_disable = 1
+--]]
 
 
 -- Optional: Additional settings for better experience
@@ -104,8 +124,16 @@ require('nvim-treesitter.configs').setup {
   },
 }
 
--- NERDTree
-vim.api.nvim_set_keymap('n', '<C-n>', ':NERDTreeToggle<CR>', { noremap = true, silent = true })
+-- LSP
+local nvim_lsp = require('lspconfig')
+nvim_lsp.rust_analyzer.setup {
+  settings = {
+    ['rust-analyzer'] = {
+      checkOnSave = {
+        command = 'clippy'
+      }
+    }
+  }
+}
+nvim_lsp.pyright.setup{}
 
--- NerdCommenter
-vim.api.nvim_set_keymap('n', '<C-/>', '<plug>NERDCommenterInvert', { noremap = true, silent = true })
