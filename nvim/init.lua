@@ -6,6 +6,9 @@ vim.opt.relativenumber = true
 vim.opt.clipboard = 'unnamedplus' -- Use the system clipboard
 vim.g.python3_host_prog = '/usr/bin/python3'
 
+-- Set pumheight to 10 lines
+vim.o.pumheight = 25
+
 -- Auto-install vim-plug if it's not already installed
 local plug_path = vim.fn.stdpath('data') .. '/site/autoload/plug.vim'
 if vim.fn.empty(vim.fn.glob(plug_path)) > 0 then
@@ -24,14 +27,22 @@ vim.cmd [[
   Plug 'hrsh7th/cmp-path'
   Plug 'hrsh7th/cmp-cmdline'
   Plug 'hrsh7th/nvim-cmp'
-  Plug 'L3MON4D3/LuaSnip'
+  Plug 'micangl/cmp-vimtex'
   Plug 'saadparwaiz1/cmp_luasnip'
-  Plug 'onsails/lspkind.nvim'
   Plug 'zbirenbaum/copilot-cmp'
-  Plug 'zbirenbaum/copilot.lua'  
 
+  Plug 'L3MON4D3/LuaSnip'
+  Plug 'onsails/lspkind.nvim'
   Plug 'nvim-lualine/lualine.nvim'
+  Plug 'zbirenbaum/copilot.lua'  
+  Plug 'nvim-treesitter/nvim-treesitter'
+  Plug 'sheerun/vim-polyglot'
+  Plug 'tpope/vim-sensible'
+  Plug 'lervag/vimtex'
+  Plug 'dense-analysis/ale'
+  Plug 'lervag/wiki'
   Plug 'AndreM222/copilot-lualine'
+
   Plug 'nvim-tree/nvim-web-devicons'
   Plug 'navarasu/onedark.nvim'
   Plug 'morhetz/gruvbox' 
@@ -41,20 +52,13 @@ vim.cmd [[
   Plug 'scrooloose/nerdcommenter'
   Plug 'pocco81/auto-save.nvim'
   Plug 'airblade/vim-gitgutter'
+  Plug 'kbwo/cmp-yank'
 
-  Plug 'nvim-treesitter/nvim-treesitter'
-  Plug 'sheerun/vim-polyglot'
-  Plug 'tpope/vim-sensible'
-  Plug 'lervag/vimtex'
-  Plug 'dense-analysis/ale'
-  Plug 'lervag/wiki'
-
-  Plug 'nvim-neo-tree/neo-tree.nvim', { 'branch': 'v3.x' }
+  Plug 'nvim-neo-tree/neo-tree.nvim'
   Plug 'MunifTanjim/nui.nvim'
-  Plug 'nvim-telescope/telescope.nvim', { 'tag': '0.1.8' }
+  Plug 'nvim-telescope/telescope.nvim'  
   Plug 'nvim-lua/plenary.nvim'
   Plug 'stevearc/conform.nvim'
-  
   Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && npx --yes yarn install' }
  
   call plug#end()
@@ -75,6 +79,10 @@ require('onedark').load()
 -- vimtex settings
 vim.g.vimtex_view_method = 'skim' 
 vim.g.vimtex_compiler_method = 'latexmk'
+vim.g.vimtex_compiler_latexmk = {
+  aux_dir = 'build'
+
+}
 vim.g.ale_fix_on_save = 1
 vim.g.ale_linters = {
   tex = {'chktex', 'lacheck'},
@@ -87,7 +95,7 @@ vim.g.vimtex_view_method = 'skim'
 
 vim.api.nvim_set_keymap('n', '<C-b>', ':Telescope buffers<CR>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', '<C-s>', ':Telescope find_files<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<C-F>', ':Telescope live_grep<CR>', { noremap = true, silent = true })
+vim.api.nvim_set_keymap('n', '<C-S-F>', ':Telescope live_grep<CR>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('t', '<Esc>', '<C-\\><C-n>', { noremap = true, silent = true })
 -- vim.api.nvim_set_keymap('n', '<C-n>', ':NERDTreeToggle<CR>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', '<C-/>', '<plug>NERDCommenterInvert', { noremap = true, silent = true })
@@ -137,6 +145,9 @@ require('nvim-treesitter.configs').setup {
     "cpp",
     "lua",
     "latex",
+    "java",
+    "markdown",
+    "toml",
     "bash",
     "json",
     "yaml",
@@ -283,11 +294,14 @@ cmp.setup {
   },
   sources = {
     { name = "copilot"},
+    { name = 'vimtex', },
     { name = 'nvim_lsp' },
     { name = 'luasnip' },
     { name = 'ultisnips' }, -- For ultisnips user.
     { name = 'path' }, -- for path completion
     { name = 'buffer', keyword_length = 4 }, -- for buffer word completion
+    { name = 'cmdline' }, -- for command line completion
+    { name = 'yank' }, -- for yank completion
   },
   formatting = {
     format = lspkind.cmp_format({
@@ -321,6 +335,9 @@ lspconfig.rust_analyzer.setup {
   }
 }
 lspconfig.pyright.setup{
+  capabilities = capabilities
+}
+lspconfig.clangd.setup{
   capabilities = capabilities
 }
 
@@ -369,4 +386,7 @@ require('lualine').setup {
   extensions = {}
 }
 
-
+require('cmp_vimtex').setup({
+    -- Eventual options can be specified here.
+    -- Check out the tutorial for further details.
+})
