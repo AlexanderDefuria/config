@@ -52,7 +52,6 @@ vim.cmd [[
   Plug 'scrooloose/nerdcommenter'
   Plug 'pocco81/auto-save.nvim'
   Plug 'airblade/vim-gitgutter'
-  Plug 'kbwo/cmp-yank'
 
   Plug 'nvim-neo-tree/neo-tree.nvim'
   Plug 'MunifTanjim/nui.nvim'
