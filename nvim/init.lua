@@ -5,6 +5,7 @@ vim.opt.number = true     -- Print the line number in front of each line
 vim.opt.relativenumber = true
 vim.opt.clipboard = 'unnamedplus' -- Use the system clipboard
 vim.g.python3_host_prog = '/usr/bin/python3'
+vim.opt.guifont = 'FiraMono Nerd Font Mono:h14:#e-subpixelantialias'
 
 -- Set pumheight to 10 lines
 vim.o.pumheight = 25
@@ -63,7 +64,16 @@ vim.cmd [[
   call plug#end()
 ]]
 
--- Plug 'davidhalter/jedi-vim'
+-- require('smear_cursor').setup({
+--     enable = true,
+--     cursor_color = "#ff8800",
+--     stiffness = 0.3,
+--     trailing_stiffness = 0.1,
+--     trailing_exponent = 3,
+--     gamma = 1,
+--     volume_reduction_exponent = -0.1,
+-- })
+
 
 require('onedark').setup({
   style = 'darker', 
@@ -80,17 +90,37 @@ vim.g.vimtex_view_method = 'skim'
 vim.g.vimtex_compiler_method = 'latexmk'
 vim.g.vimtex_compiler_latexmk = {
   aux_dir = 'build'
-
 }
+
+--vim.g.vimtex_grammar_vlty = {
+  --lt_command = 'languagetool'
+--}
+--vim.opt.spelllang=en_gb
+
 vim.g.ale_fix_on_save = 1
 vim.g.ale_linters = {
   tex = {'chktex', 'lacheck'},
   python = {'black'}
 }
+vim.g.ale_fixers = {
+  tex = {'latexindent'},
+  --python = {'black'}
+}
+vim.g.ale_hover_cursor = 1
+vim.g.ale_hover_to_preview = 1
+
+
 vim.g.vimtex_view_method = 'skim'
 -- vim.g.vimtex_view_skim_sync = 1
 -- vim.g.vimtex_view_skim_activate = 0
 -- vim.g.vimtex_view_skim_no_select = 0
+vim.g.vimtex_syntax_conceal = {
+  greek = 1,
+  math_bounds = 1,
+  math_delimiters = 1,
+  math_fracs = 1,
+  math_symbols = 1,
+}
 
 vim.api.nvim_set_keymap('n', '<C-b>', ':Telescope buffers<CR>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', '<C-s>', ':Telescope find_files<CR>', { noremap = true, silent = true })
@@ -98,8 +128,8 @@ vim.api.nvim_set_keymap('n', '<C-S-F>', ':Telescope live_grep<CR>', { noremap = 
 vim.api.nvim_set_keymap('t', '<Esc>', '<C-\\><C-n>', { noremap = true, silent = true })
 -- vim.api.nvim_set_keymap('n', '<C-n>', ':NERDTreeToggle<CR>', { noremap = true, silent = true })
 vim.api.nvim_set_keymap('n', '<C-/>', '<plug>NERDCommenterInvert', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('i', '<Tab>', 'pumvisible() ? "\\<C-n>" : "\\<Tab>"', {expr = true, noremap = true, silent = true})
-vim.api.nvim_set_keymap('i', '<S-Tab>', 'pumvisible() ? "\\<C-p>" : "\\<S-Tab>"', {expr = true, noremap = true, silent = true})
+--vim.api.nvim_set_keymap('i', '<Tab>', 'pumvisible() ? "\\<C-n>" : "\\<Tab>"', {expr = true, noremap = true, silent = true})
+--vim.api.nvim_set_keymap('i', '<S-Tab>', 'pumvisible() ? "\\<C-p>" : "\\<S-Tab>"', {expr = true, noremap = true, silent = true})
 --vim.api.nvim_set_keymap('i', '<CR>', 'pumvisible() ? coc#_select_confirm() : "\\<C-g>u\\<CR>\\<c-r>=coc#on_enter()\\<CR>"', {expr = true, noremap = true, silent = true})
 --vim.api.nvim_set_keymap('i', '<C-Space>', 'coc#refresh()', {expr = true, noremap = true, silent = true})
 vim.api.nvim_set_keymap("n", "<leader>dd", ":lua vim.diagnostic.open_float()<CR>", {silent=true})
@@ -111,15 +141,15 @@ vim.api.nvim_set_keymap('n', "<leader>ff", ":Format<CR>", { noremap = true, sile
 
 
 -- Optional: CoC settings for auto-completion
-vim.g.coc_global_extensions = {
-  'coc-snippets',
-  'coc-pairs',
-  'coc-texlab',
-  'coc-json',
-  'coc-css',
-  'coc-clangd',
-  'coc-pyright',
-}
+-- vim.g.coc_global_extensions = {
+--   'coc-snippets',
+--   'coc-pairs',
+--   'coc-texlab',
+--   'coc-json',
+--   'coc-css',
+--   'coc-clangd',
+--   'coc-pyright',
+-- }
 -- Disable coc for certain filetypes
 --vim.cmd [[
   --autocmd FileType python let b:coc_suggest_disable = 1
@@ -206,7 +236,11 @@ require('conform').setup({
     python = {'black'},
     c = {'clang-format'},
     cpp = {'clang-format'},
-  }
+  },
+  -- Disable formatting on save
+  opts = {
+    format_on_save = false,
+  },
 })
 
 -- Configure the Format command
@@ -233,7 +267,7 @@ require('copilot_cmp').setup()
 local has_words_before = function()
   if vim.api.nvim_buf_get_option(0, "buftype") == "prompt" then return false end
   local line, col = unpack(vim.api.nvim_win_get_cursor(0))
-  return col ~= 0 and vim.api.nvim_buf_get_text(0, line-1, 0, line-1, col, {})[1]:match("^%s*$") == nil
+  return col ~= 0 and vim.api.nvim_buf_get_text(0, line-1, 0, line-1, col, {})[1]:match("^%s*m") == nil
 end
 
 -- nvim-cmp setup
@@ -273,8 +307,8 @@ cmp.setup {
     ['<Tab>'] = cmp.mapping(function(fallback)
       if cmp.visible() and not has_words_before() then
         fallback()
-      elseif cmp.visible() then
-        cmp.select_next_item()
+      --elseif cmp.visible() then
+        --cmp.select_next_item()
       elseif luasnip.expand_or_jumpable() then
         luasnip.expand_or_jump()
       else
@@ -385,7 +419,7 @@ require('lualine').setup {
   extensions = {}
 }
 
-require('cmp_vimtex').setup({
-    -- Eventual options can be specified here.
-    -- Check out the tutorial for further details.
-})
+--require('cmp_vimtex').setup({
+--    -- Eventual options can be specified here.
+--    -- Check out the tutorial for further details.
+--})
