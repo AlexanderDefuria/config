@@ -7,5 +7,6 @@
 !/nvim/lua/core.lua
 !/nvim/lua/tools.lua
 !/nvim/lua/ui.lua
+!/
 nvim/pack/github/start/copilot.vim
 
